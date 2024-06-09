@@ -14,39 +14,30 @@ public class BeatMaker : MonoBehaviour
     public void PlayBeats(int bpm)
     {
         IsPlaying = true;
+        _progress = 0;
         Bpm = bpm;
-        StartNewCoroutine();
     }
 
     public void StopBeats()
     {
         IsPlaying = false;
         Bpm = 0;
-        StopOldCoroutine();
     }
+    
+    private float _progress;
 
-    private void StartNewCoroutine()
+    private void Update()
     {
-        StopOldCoroutine();
-        _coroutine = StartCoroutine(IE_PlayBeats());
-    }
-
-    private void StopOldCoroutine()
-    {
-        if (_coroutine != null)
+        if (!IsPlaying)
         {
-            StopCoroutine(_coroutine);
-            _coroutine = null;
+            return;
         }
-    }
 
-    private IEnumerator IE_PlayBeats()
-    {
-        var interval = Bpm / 60.0F;
-        while (true)
+        _progress += Time.deltaTime * (Bpm / 60.0F);
+        while (_progress > 1)
         {
-            yield return new WaitForSeconds(interval);
             OnBeat?.Invoke();
+            _progress -= 1;
         }
     }
 
