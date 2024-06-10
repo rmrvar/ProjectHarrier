@@ -1,35 +1,53 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 // TODO: Rename
 public class WasOnBeatTester : MonoBehaviour
 {
     [SerializeField]
-    private float _leeway;
-
+    
+    private float _beatTime; // Time of each beat
+    public float _leeway; // Window of lenience
+  
     public event System.Action OnSuccess;
     public event System.Action OnFailure;
 
-    // Did you interact on the beat, yes or no?
-    public bool Interact()
-    {
-        // TODO: This frame perfect success is too hard for players.
-        // Add some leeway before or after that is still a success.
+   private bool didInteractHappen;
+   private float interactTime;
+   private void Update()
+   {
+     float timeSinceBeat = Time.time - _beatTime; 
+     float timeSinceInteract = Time.time - interactTime;
+        // Checks if time since last beat fits in window
 
-        if (_isThisFrameABeat)
-        {
-            OnSuccess?.Invoke();
-        }
-        else
+        if (didInteractHappen && timeSinceInteract > _leeway)
         {
             OnFailure?.Invoke();
+            didInteractHappen = false;
         }
-        return _isThisFrameABeat;
+        else if (didInteractHappen && timeSinceBeat <= _leeway)
+        {
+
+            OnSuccess?.Invoke();
+            didInteractHappen = false;
+        }
+
+   }
+    // Did you interact on the beat, yes or no?
+    public void Interact()
+    {
+        
+       interactTime = Time.time; 
+       didInteractHappen = true;
+
+       
     }
 
     private void Start()
     {
+        // Beat set to true on each beat
         BeatMaker.Instance.OnBeat += DoSomethingOnBeat;
     }
 
@@ -39,8 +57,9 @@ public class WasOnBeatTester : MonoBehaviour
     }
 
     private void DoSomethingOnBeat()
-    {
+    { // Sets beat to true and gives time
         _isThisFrameABeat = true;
+        _beatTime = Time.time; 
     }
 
     private void LateUpdate()
