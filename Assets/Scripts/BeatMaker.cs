@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class BeatMaker : MonoBehaviour
@@ -49,6 +47,4 @@ public class BeatMaker : MonoBehaviour
           );
         Instance = this;
     }
-
-    private Coroutine _coroutine;
 }

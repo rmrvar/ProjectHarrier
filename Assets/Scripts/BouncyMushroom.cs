@@ -1,42 +1,55 @@
 using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class BouncyMushroom : MonoBehaviour
 {
-    WasOnBeatTester beatTester;
-    void Awake()
-    {
-        beatTester = GetComponent<WasOnBeatTester>();
-    }
-    // Start is called before the first frame update
-    void Start()
-    {
-        beatTester.OnSuccess += turnOnAntiGravity; 
-        beatTester.OnFailure += failureFunction; 
+    [SerializeField]
+    private UnityEvent _onSuccess;
 
-    }
-    void OnDestroy()
-    {
-        beatTester.OnSuccess -= turnOnAntiGravity;
-        beatTester.OnFailure -= failureFunction;
-    }
+    BeatTester _beatTester;
 
-    void failureFunction()
+    private void Awake()
     {
-        print("failure");
-    }
-
-    void turnOnAntiGravity()
-    {
-        print("Gravity turned off");
-    }
-
-    void OnCollisionEnter2D(Collision2D collision)
-    {
-        beatTester.Interact();
-        
+        _beatTester = GetComponent<BeatTester>();
     }
     
+    private void Start()
+    {
+        BeatMaker.Instance.OnBeat += OnBeat;
+        _beatTester.OnSuccess += OnSuccess; 
+        _beatTester.OnFailure += OnFailure; 
+    }
+
+    private void OnDestroy()
+    {
+        BeatMaker.Instance.OnBeat -= OnBeat;
+        _beatTester.OnSuccess -= OnSuccess;
+        _beatTester.OnFailure -= OnFailure;
+    }
+
+    private void OnBeat()
+    {
+        // Play beat animation (just change color for now).
+    }
+
+    private void OnSuccess()
+    {
+        Debug.Log("success");
+        _onSuccess?.Invoke();
+    }
+
+    private void OnFailure()
+    {
+        Debug.Log("failure");
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (!collision.gameObject.CompareTag("Player"))
+        {
+            return;
+        }
+        _beatTester.Interact();
+    }
 }

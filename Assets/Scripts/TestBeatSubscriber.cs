@@ -6,16 +6,16 @@ public class TestBeatSubscriber : MonoBehaviour
 {
     private void Start()
     {
-        BeatMaker.Instance.OnBeat += OnBeat;
+        BeatMaker.Instance.OnBeat += PrintInfo;
         BeatMaker.Instance.PlayBeats(60);
     }
 
     private void OnDestroy()
     {
-        BeatMaker.Instance.OnBeat -= OnBeat;
+        BeatMaker.Instance.OnBeat -= PrintInfo;
     }
 
-    private void OnBeat()
+    private void PrintInfo()
     {
         Debug.Log("Beat!");
     }
