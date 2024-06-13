@@ -13,6 +13,9 @@ public class GameManager : MonoBehaviour
     private Vector2 _startPosition;
     private Quaternion _startRotation;
 
+    [SerializeField]
+    private Animator _curtainAnimator;
+
     private void Awake()
     {
         Debug.Assert(
@@ -33,6 +36,8 @@ public class GameManager : MonoBehaviour
         _playerHealth.OnKilled += OnPlayerKilled;
         BeatMaker.Instance.OnBeat += OnBeat;
         BeatMaker.Instance.PlayBeats(60);
+
+        _curtainAnimator.speed = 1 / _respawnFadeTime;
     }
 
     private void OnDestroy()
@@ -51,18 +56,33 @@ public class GameManager : MonoBehaviour
         StartCoroutine(IE_RespawnPlayer());
     }
 
+    private float _respawnFadeTime = 1.0F;
+    private float _respawnWaitTime = 0.5F;
+
     private IEnumerator IE_RespawnPlayer()
     {
         var controller = _playerTransform.GetComponent<PlayerController>();
         controller.controlEnabled = false;
-        // TODO: Add fade out.
-        yield return new WaitForSeconds(1);
-        // TODO: Reset the state of the level. Perhaps easiest to just do a scene reload?
-        controller.InvertGravity = false;
+
+        _curtainAnimator.SetTrigger("FadeIn");
+        yield return new WaitForSeconds(_respawnFadeTime + 0.05F);
+
+        ResetLevelState();
+
+        yield return new WaitForSeconds(_respawnWaitTime);
+
+        _curtainAnimator.SetTrigger("FadeOut");
+        yield return new WaitForSeconds(_respawnFadeTime + 0.05F);
+
         controller.controlEnabled = true;
+    }
+
+    private void ResetLevelState()
+    {
+        var controller = _playerTransform.GetComponent<PlayerController>();
+        controller.InvertGravity = false;
         _playerHealth.TopOff();
         _playerTransform.SetPositionAndRotation(_startPosition, _startRotation);
         OnPlayerRespawned?.Invoke();
-        // TODO: Add fade in.
     }
 }
