@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    [SerializeField]
+    private AudioClip _level1BackgroundMusic;
+
+    private AudioSource _audioSource;
+
     public static GameManager Instance { get; private set; }
 
     public event System.Action OnPlayerRespawned;
@@ -29,6 +34,7 @@ public class GameManager : MonoBehaviour
         _playerTransform = player.GetComponent<Transform>();
         _startPosition = _playerTransform.position;
         _startRotation = _playerTransform.rotation;
+        _audioSource = GetComponent<AudioSource>();
     }
 
     private void Start()
@@ -38,6 +44,10 @@ public class GameManager : MonoBehaviour
         BeatMaker.Instance.PlayBeats(60);
 
         _curtainAnimator.speed = 1 / _respawnFadeTime;
+
+        _audioSource.clip = _level1BackgroundMusic;
+        _audioSource.loop = true;
+        _audioSource.Play();
     }
 
     private void OnDestroy()
@@ -68,6 +78,8 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(_respawnFadeTime + 0.05F);
 
         ResetLevelState();
+        _audioSource.Stop();
+        BeatMaker.Instance.StopBeats();
 
         yield return new WaitForSeconds(_respawnWaitTime);
 
@@ -75,6 +87,8 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(_respawnFadeTime + 0.05F);
 
         controller.controlEnabled = true;
+        _audioSource.Play();
+        BeatMaker.Instance.PlayBeats(60);
     }
 
     private void ResetLevelState()
