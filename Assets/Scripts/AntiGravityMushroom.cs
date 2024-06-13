@@ -109,6 +109,7 @@ public class AntiGravityMushroom : MonoBehaviour
     private void Reset()
     {
         IsActive = false;
+        
         // Set colors back to red.
         foreach (var quad in _debugQuads)
         {
