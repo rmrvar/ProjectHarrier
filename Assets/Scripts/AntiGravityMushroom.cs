@@ -51,6 +51,17 @@ public class AntiGravityMushroom : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+        GameManager.Instance.OnPlayerRespawned += Reset;
+    }
+
+    private void OnDestroy()
+    {
+        GameManager.Instance.OnPlayerRespawned -= Reset;
+    }
+
+
     // TODO: If IsActive is set to true, have to retrigger collisions (overlap a box and do the same thing as in OnCollisionEnter2D).
     public bool IsActive { get; private set; } = false;
 
@@ -92,6 +103,16 @@ public class AntiGravityMushroom : MonoBehaviour
         if (IsActive)
         {
             controller.InvertGravity = false;
+        }
+    }
+
+    private void Reset()
+    {
+        IsActive = false;
+        // Set colors back to red.
+        foreach (var quad in _debugQuads)
+        {
+            quad.GetComponent<SpriteRenderer>().color = Color.red;
         }
     }
 }

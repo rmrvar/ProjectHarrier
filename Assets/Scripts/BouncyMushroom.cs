@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.U2D;
 
 public class BouncyMushroom : MonoBehaviour
 {
@@ -8,12 +9,14 @@ public class BouncyMushroom : MonoBehaviour
     private UnityEvent _onSuccess;
 
     private BeatTester _beatTester;
-    private SpriteRenderer _spriteRenderer;
+    private SpriteShapeRenderer _spriteRenderer;
+
+    private bool _isResponsive = true;
 
     private void Awake()
     {
         _beatTester = GetComponent<BeatTester>();
-        _spriteRenderer = GetComponent<SpriteRenderer>();
+        _spriteRenderer = GetComponentInChildren<SpriteShapeRenderer>();
     }
     
     private void Start()
@@ -21,6 +24,8 @@ public class BouncyMushroom : MonoBehaviour
         BeatMaker.Instance.OnBeat += OnBeat;
         _beatTester.OnSuccess += OnSuccess; 
         _beatTester.OnFailure += OnFailure; 
+
+        GameManager.Instance.OnPlayerRespawned += Reset;
     }
 
     private void OnDestroy()
@@ -28,10 +33,16 @@ public class BouncyMushroom : MonoBehaviour
         BeatMaker.Instance.OnBeat -= OnBeat;
         _beatTester.OnSuccess -= OnSuccess;
         _beatTester.OnFailure -= OnFailure;
+
+        GameManager.Instance.OnPlayerRespawned -= Reset;
     }
 
     private void OnBeat()
     {
+        if (!_isResponsive)
+        {
+            return;
+        }
         StartCoroutine(IE_PlayBeatAnimation());
     }
 
@@ -39,6 +50,8 @@ public class BouncyMushroom : MonoBehaviour
     {
         Debug.Log("success");
         _onSuccess?.Invoke();
+        _isResponsive = false;
+        _spriteRenderer.color = Color.blue;
     }
 
     private void OnFailure()
@@ -48,6 +61,10 @@ public class BouncyMushroom : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        if (!_isResponsive)
+        {
+            return;
+        }
         if (!collision.gameObject.CompareTag("Player"))
         {
             return;
@@ -61,5 +78,11 @@ public class BouncyMushroom : MonoBehaviour
         _spriteRenderer.color = Color.red;
         yield return new WaitForSeconds(0.07F);
         _spriteRenderer.color = oldColor;
+    }
+
+    private void Reset()
+    {
+        _isResponsive = true;
+        _spriteRenderer.color = Color.white;
     }
 }

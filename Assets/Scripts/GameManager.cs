@@ -4,7 +4,9 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    public GameManager Instance { get; private set; }
+    public static GameManager Instance { get; private set; }
+
+    public event System.Action OnPlayerRespawned;
 
     private Health _playerHealth;
     private Transform _playerTransform;
@@ -56,9 +58,11 @@ public class GameManager : MonoBehaviour
         // TODO: Add fade out.
         yield return new WaitForSeconds(1);
         // TODO: Reset the state of the level. Perhaps easiest to just do a scene reload?
+        controller.InvertGravity = false;
         controller.controlEnabled = true;
         _playerHealth.TopOff();
         _playerTransform.SetPositionAndRotation(_startPosition, _startRotation);
+        OnPlayerRespawned?.Invoke();
         // TODO: Add fade in.
     }
 }
