@@ -29,11 +29,19 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         _playerHealth.OnKilled += OnPlayerKilled;
+        BeatMaker.Instance.OnBeat += OnBeat;
+        BeatMaker.Instance.PlayBeats(60);
     }
 
     private void OnDestroy()
     {
+        BeatMaker.Instance.OnBeat -= OnBeat;
         _playerHealth.OnKilled -= OnPlayerKilled;
+    }
+
+    private void OnBeat()
+    {
+        Debug.Log("Beat!");
     }
 
     private void OnPlayerKilled()
@@ -47,6 +55,7 @@ public class GameManager : MonoBehaviour
         controller.controlEnabled = false;
         // TODO: Add fade out.
         yield return new WaitForSeconds(1);
+        // TODO: Reset the state of the level. Perhaps easiest to just do a scene reload?
         controller.controlEnabled = true;
         _playerHealth.TopOff();
         _playerTransform.SetPositionAndRotation(_startPosition, _startRotation);
