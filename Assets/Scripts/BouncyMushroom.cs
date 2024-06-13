@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -6,11 +7,13 @@ public class BouncyMushroom : MonoBehaviour
     [SerializeField]
     private UnityEvent _onSuccess;
 
-    BeatTester _beatTester;
+    private BeatTester _beatTester;
+    private SpriteRenderer _spriteRenderer;
 
     private void Awake()
     {
         _beatTester = GetComponent<BeatTester>();
+        _spriteRenderer = GetComponent<SpriteRenderer>();
     }
     
     private void Start()
@@ -29,7 +32,7 @@ public class BouncyMushroom : MonoBehaviour
 
     private void OnBeat()
     {
-        // Play beat animation (just change color for now).
+        StartCoroutine(IE_PlayBeatAnimation());
     }
 
     private void OnSuccess()
@@ -50,5 +53,13 @@ public class BouncyMushroom : MonoBehaviour
             return;
         }
         _beatTester.Interact();
+    }
+
+    private IEnumerator IE_PlayBeatAnimation()
+    {
+        var oldColor = _spriteRenderer.color;
+        _spriteRenderer.color = Color.red;
+        yield return new WaitForSeconds(0.07F);
+        _spriteRenderer.color = oldColor;
     }
 }
