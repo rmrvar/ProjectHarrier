@@ -16,6 +16,7 @@ public class MenuController : MonoBehaviour
         SceneManager.LoadScene(newGameLevel);
     }
 
+//
     public void LoadGameDialog_Yes()
     {
        if (PlayerPrefs.HasKey("SavedLevel"))
