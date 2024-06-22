@@ -69,6 +69,20 @@ public class BouncyMushroom : MonoBehaviour
         {
             return;
         }
+        var normal = GetMushroomNormal(collision);
+        if (Vector2.Dot(normal, Vector2.up) <= 0)
+        {
+            return;
+        }
+
+        var kinematicObject = collision.gameObject.GetComponent<KinematicObject>();
+        if (kinematicObject != null)
+        {
+            Debug.Log("Bounce!");
+            kinematicObject.Bounce(normal * Mathf.Abs(kinematicObject.PrevVelocity.y * 3));
+        }
+
+        Debug.DrawLine(collision.contacts[0].point, collision.contacts[0].normal, Color.red);
         _beatTester.Interact();
     }
 
@@ -84,5 +98,19 @@ public class BouncyMushroom : MonoBehaviour
     {
         _isResponsive = true;
         _spriteRenderer.color = Color.white;
+    }
+
+    private Vector2 GetMushroomNormal(Collision2D collision)
+    {
+        var point1 = collision.contacts[0].point;
+        var normal1 = collision.contacts[0].normal;
+        var tangent1 = new Vector2(-normal1.y, normal1.x);
+
+        var point2 = collision.collider.ClosestPoint(
+            point1 + tangent1 * 0.001F
+          );
+        var tangent2 = (point2 - point1).normalized;
+        var normal2 = new Vector2(-tangent2.y, tangent2.x);
+        return normal2;
     }
 }
