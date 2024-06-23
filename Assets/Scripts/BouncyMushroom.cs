@@ -3,6 +3,9 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.U2D;
 
+// TODO: @Guille
+// This class needs to be modified to use the new BeatTester, and the color needs to be active for 
+// the whole beat, not just 0.07 seconds. Instead of calling BeatTester.Interact, call BeatTester.TestBeat.
 public class BouncyMushroom : MonoBehaviour
 {
     [SerializeField]
