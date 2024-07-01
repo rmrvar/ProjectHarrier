@@ -1,5 +1,6 @@
 using Platformer.Mechanics;
 using UnityEngine;
+using UnityEngine.Audio;
 
 public class AntiGravityMushroom : MonoBehaviour
 {
@@ -9,6 +10,9 @@ public class AntiGravityMushroom : MonoBehaviour
     public float Height { get; private set; } = 10;
 
     private GameObject[] _debugQuads;
+
+    [SerializeField] private AudioClip _gravity;
+    [SerializeField] private AudioSource _audioSource;
 
     private void Awake()
     {
@@ -74,6 +78,7 @@ public class AntiGravityMushroom : MonoBehaviour
         {
             quad.GetComponent<SpriteRenderer>().color = Color.blue;
         }
+
     }
 
     private void OnTriggerEnter2D(Collider2D collider)
@@ -89,7 +94,11 @@ public class AntiGravityMushroom : MonoBehaviour
         {
             controller.InvertGravity = true;
             controller.StopJump();
+            // Plays SFX
+            _audioSource.clip = _gravity;
+            _audioSource.Play();
         }
+        
     }
 
     private void OnTriggerExit2D(Collider2D collider)
@@ -104,6 +113,7 @@ public class AntiGravityMushroom : MonoBehaviour
         {
             controller.InvertGravity = false;
         }
+        _audioSource.Stop();
     }
 
     private void Reset()

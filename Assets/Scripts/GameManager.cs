@@ -1,17 +1,22 @@
 using System.Collections;
 using Platformer.Mechanics;
 using UnityEngine;
-
+using TMPro;
 public class GameManager : MonoBehaviour
 {
     [SerializeField]
     private AudioClip _level1BackgroundMusic;
+    [SerializeField]
+    private AudioClip _onFail; // On fail clip
 
     private AudioSource _audioSource;
+    [SerializeField]
+    private AudioSource _audioSourceTwo; // Added audio source for onfail
 
     public static GameManager Instance { get; private set; }
 
     public event System.Action OnPlayerRespawned;
+    public event System.Action OnGameOver;
 
     private Health _playerHealth;
     private Transform _playerTransform;
@@ -21,8 +26,16 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private Animator _curtainAnimator;
 
+    [Header("Game HUD")]
+    [SerializeField] 
+    private TMP_Text _lifeCounter;
+    [SerializeField] 
+    private int _lives;
+    
     private void Awake()
     {
+        
+        
         Debug.Assert(
             Instance == null,
             $"Attempted to create multiple instances of {typeof(GameManager).Name}!"
@@ -35,10 +48,12 @@ public class GameManager : MonoBehaviour
         _startPosition = _playerTransform.position;
         _startRotation = _playerTransform.rotation;
         _audioSource = GetComponent<AudioSource>();
+        DontDestroyOnLoad(gameObject);
     }
 
     private void Start()
-    {
+    {   _lives = 1;
+        _lifeCounter.text = "x" + _lives.ToString();
         _playerHealth.OnKilled += OnPlayerKilled;
         BeatMaker.Instance.OnBeat += OnBeat;
         BeatMaker.Instance.PlayBeats(60);
@@ -61,9 +76,21 @@ public class GameManager : MonoBehaviour
         Debug.Log("Beat!");
     }
 
+
     private void OnPlayerKilled()
     {
-        StartCoroutine(IE_RespawnPlayer());
+        // Fail sfx when player is killed
+        _audioSourceTwo.clip = _onFail;
+        _audioSourceTwo.Play();
+        if(_lives > 1)
+        {
+            StartCoroutine(IE_RespawnPlayer());
+        }
+        else
+        {   
+            print("GAME OVER!");
+            StartCoroutine(IE_GameOver());
+        }
     }
 
     private float _respawnFadeTime = 1.0F;
@@ -71,6 +98,8 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator IE_RespawnPlayer()
     {
+        _lives--;
+        _lifeCounter.text = _lives.ToString();
         var controller = _playerTransform.GetComponent<PlayerController>();
         controller.controlEnabled = false;
 
@@ -89,6 +118,21 @@ public class GameManager : MonoBehaviour
         controller.controlEnabled = true;
         _audioSource.Play();
         BeatMaker.Instance.PlayBeats(60);
+    }
+    private IEnumerator IE_GameOver()
+    {   _lives--;
+       var controller = _playerTransform.GetComponent<PlayerController>();
+        controller.controlEnabled = false;
+
+        _curtainAnimator.SetTrigger("FadeIn");
+        yield return new WaitForSeconds(1 + 0.05F);
+
+        OnGameOver?.Invoke();
+        _audioSource.Stop();
+        BeatMaker.Instance.StopBeats();
+
+        _curtainAnimator.SetTrigger("FadeOut");
+        yield return new WaitForSeconds(1 + 0.05F);
     }
 
     private void ResetLevelState()
